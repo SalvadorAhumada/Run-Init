@@ -6,11 +6,15 @@ SET name=%2
 
 SET folder=WEBDEV
 
-if not exist C:\Users\%USERNAME%\Documents\%folder%\ (
-  ECHO [7;31mFolder C:\Users\%USERNAME%\Documents\%folder%\ Not Found[0m
+SET directory=C:\
+
+SET valid_path=true
+
+CALL :Validate_Directory %directory%Users\%USERNAME%\Documents\%folder%\
+if "%valid_path%"=="false" (
   CALL :Create_Folder
   EXIT /b
-) 
+)
 
 if "%type%"=="" (
     ECHO [Run-Init V0.1]
@@ -45,26 +49,24 @@ EXIT /B
   GOTO :EOF # return from CALL
 
 :Main
-  if not exist C:\Users\%USERNAME%\Documents\%folder%\%name% (
-    ECHO [7;31mC:\Users\%USERNAME%\Documents\%folder%\%name% Not Found[0m
+  CALL :Validate_Directory %directory%Users\%USERNAME%\Documents\%folder%\%name%
+  if "%valid_path%"=="false" (
     EXIT /b
   )
-    GOTO :Start_Project %name%
+  GOTO :Start_Project %name%
 EXIT /b
 
 :Start_Project
     ECHO [7mOpening %name%...[0m
-    cd C:\Users\%USERNAME%\Documents\%folder%\%2 && code . && wt -w 0 -d C:\Users\%USERNAME%\Documents\%folder%\%2 && ECHO [7mDone![0m && git branch
+    cd C:\Users\%USERNAME%\Documents\%folder%\%name% && code . && wt -w 0 -d C:\Users\%USERNAME%\Documents\%folder%\%name% && ECHO [7mDone![0m && git branch
 EXIT /b
 
 :Run_Script
-if not exist C:\scripts\src\%name%.ps1 (
-  ECHO [7;31mC:\scripts\src\%name%.ps1 Not Found[0m
-  EXIT /b
-) 
-
-  ECHO [7mRunning %name%...[0m
-  call Powershell.exe -executionpolicy remotesigned -File  C:\scripts\src\%name%.ps1
+  CALL :Validate_Directory %directory%scripts\src\%name%.ps1
+  if "%valid_path%"=="false" (
+    EXIT /b
+  )
+  CALL Powershell.exe -executionpolicy remotesigned -File  C:\scripts\src\%name%.ps1
 EXIT /b
 
 :Create_Folder
@@ -72,3 +74,11 @@ EXIT /b
   mkdir C:\Users\%USERNAME%\Documents\%folder%\
   ECHO [7m%folder% created successfully[0m
 EXIT /b
+
+:Validate_Directory
+SET validate_path=%1
+if not exist %validate_path% (
+  ECHO [7;31m%validate_path% Not Found[0m
+  SET valid_path=false
+  EXIT /b
+) 
