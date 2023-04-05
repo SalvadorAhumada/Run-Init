@@ -1,1 +1,1 @@
-cmd.exe /c "code C:\scripts\init.bat"
+cmd.exe /c "code C:\scripts"
